@@ -7,18 +7,21 @@ import {
   StyleSheet,
   StatusBar,
   SafeAreaView,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useLocks} from '../context/LocksContext';
 import LockListItem from '../components/LockListItem';
 import SearchBar from '../components/SearchBar';
 import DigitalKeyModal from '../components/DigitalKeyModal';
+import LockDetailScreen from './LockDetailScreen';
 import {Lock} from '../types';
 
 export default function LocksScreen() {
   const {locks, openingLockId, remoteOpen} = useLocks();
   const [search, setSearch] = useState('');
   const [digitalKeyLock, setDigitalKeyLock] = useState<Lock | null>(null);
+  const [detailLock, setDetailLock] = useState<Lock | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -60,7 +63,7 @@ export default function LocksScreen() {
           <LockListItem
             lock={item}
             isOpening={openingLockId === item.id}
-            onPress={() => remoteOpen(item.id)}
+            onPress={() => setDetailLock(item)}
           />
         )}
         ListEmptyComponent={
@@ -85,6 +88,23 @@ export default function LocksScreen() {
         lock={digitalKeyLock}
         onClose={() => setDigitalKeyLock(null)}
       />
+
+      {/* Lock detail */}
+      <Modal
+        visible={detailLock !== null}
+        animationType="slide"
+        onRequestClose={() => setDetailLock(null)}>
+        {detailLock && (
+          <LockDetailScreen
+            lock={detailLock}
+            onClose={() => setDetailLock(null)}
+            onRemoteOpen={id => {
+              setDetailLock(null);
+              remoteOpen(id);
+            }}
+          />
+        )}
+      </Modal>
     </SafeAreaView>
   );
 }

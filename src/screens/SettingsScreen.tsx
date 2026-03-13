@@ -8,8 +8,10 @@ import {
   StatusBar,
   TouchableOpacity,
   ScrollView,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import SchedulesScreen from './SchedulesScreen';
 
 interface SettingRowProps {
   icon: string;
@@ -58,6 +60,7 @@ export default function SettingsScreen() {
   const [nfcEnabled, setNfcEnabled] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [autoLock, setAutoLock] = useState(false);
+  const [showSchedules, setShowSchedules] = useState(false);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -113,6 +116,11 @@ export default function SettingsScreen() {
             onToggle={setAutoLock}
           />
           <SettingRow
+            icon="clock-time-four-outline"
+            label="Schedules"
+            onPress={() => setShowSchedules(true)}
+          />
+          <SettingRow
             icon="map-marker-outline"
             label="Current Site"
             value="AL. MASHTAL"
@@ -131,6 +139,13 @@ export default function SettingsScreen() {
           <Text style={styles.logoutText}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Modal
+        visible={showSchedules}
+        animationType="slide"
+        onRequestClose={() => setShowSchedules(false)}>
+        <SchedulesScreen onClose={() => setShowSchedules(false)} />
+      </Modal>
     </SafeAreaView>
   );
 }
