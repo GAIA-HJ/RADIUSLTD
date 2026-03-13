@@ -1,0 +1,163 @@
+import {Lock, AccessEvent, Person, IQMetric} from '../types';
+
+export const MOCK_LOCKS: Lock[] = [
+  {
+    id: '1',
+    name: 'ADMIN- INSIDE READER',
+    location: 'AL. MASHTAL',
+    status: 'online',
+    isOpen: false,
+    bleDeviceId: 'BLE-ADMIN-IN-001',
+  },
+  {
+    id: '2',
+    name: 'ADMIN- OUTSIDE READER',
+    location: 'AL. MASHTAL',
+    status: 'online',
+    isOpen: false,
+    bleDeviceId: 'BLE-ADMIN-OUT-001',
+  },
+  {
+    id: '3',
+    name: 'COMPASS- INSIDE READER',
+    location: 'AL. MASHTAL',
+    status: 'online',
+    isOpen: false,
+    bleDeviceId: 'BLE-COMPASS-IN-001',
+  },
+  {
+    id: '4',
+    name: 'COMPASS- OUTSIDE READER',
+    location: 'AL. MASHTAL',
+    status: 'online',
+    isOpen: false,
+    bleDeviceId: 'BLE-COMPASS-OUT-001',
+  },
+  {
+    id: '5',
+    name: 'CREATIVE- INSIDE READER',
+    location: 'AL. MASHTAL',
+    status: 'online',
+    isOpen: false,
+    bleDeviceId: 'BLE-CREATIVE-IN-001',
+  },
+  {
+    id: '6',
+    name: 'CREATIVE- OUTSIDE READER',
+    location: 'AL. MASHTAL',
+    status: 'online',
+    isOpen: false,
+    bleDeviceId: 'BLE-CREATIVE-OUT-001',
+  },
+  {
+    id: '7',
+    name: 'MAIN ENTRANCE READER',
+    location: 'AL. MASHTAL',
+    status: 'online',
+    isOpen: false,
+    bleDeviceId: 'BLE-MAIN-001',
+  },
+  {
+    id: '8',
+    name: 'SOUND DOOR OUTSIDE READER',
+    location: 'AL. MASHTAL',
+    status: 'online',
+    isOpen: false,
+    bleDeviceId: 'BLE-SOUND-OUT-001',
+  },
+];
+
+export const MOCK_EVENTS: AccessEvent[] = [
+  {
+    id: 'e1',
+    lockId: '7',
+    lockName: 'MAIN ENTRANCE READER',
+    personName: 'John Smith',
+    timestamp: new Date(Date.now() - 5 * 60 * 1000),
+    method: 'digital_key',
+    success: true,
+  },
+  {
+    id: 'e2',
+    lockId: '1',
+    lockName: 'ADMIN- INSIDE READER',
+    personName: 'Sarah Johnson',
+    timestamp: new Date(Date.now() - 30 * 60 * 1000),
+    method: 'card',
+    success: true,
+  },
+  {
+    id: 'e3',
+    lockId: '2',
+    lockName: 'ADMIN- OUTSIDE READER',
+    personName: 'Unknown',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    method: 'card',
+    success: false,
+  },
+  {
+    id: 'e4',
+    lockId: '7',
+    lockName: 'MAIN ENTRANCE READER',
+    personName: 'Mike Davis',
+    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
+    method: 'remote',
+    success: true,
+  },
+];
+
+export const MOCK_PEOPLE: Person[] = [
+  {
+    id: 'p1',
+    name: 'John Smith',
+    email: 'john.smith@radius.com',
+    phone: '+1 555-0101',
+    accessLocks: ['1', '2', '7'],
+    role: 'admin',
+    active: true,
+  },
+  {
+    id: 'p2',
+    name: 'Sarah Johnson',
+    email: 'sarah.j@radius.com',
+    phone: '+1 555-0102',
+    accessLocks: ['1', '7'],
+    role: 'user',
+    active: true,
+  },
+  {
+    id: 'p3',
+    name: 'Mike Davis',
+    email: 'mike.d@radius.com',
+    accessLocks: ['7'],
+    role: 'guest',
+    active: true,
+  },
+];
+
+export const MOCK_IQS: IQMetric[] = [
+  {
+    id: 'iq1',
+    lockId: '7',
+    lockName: 'MAIN ENTRANCE READER',
+    totalEntries: 142,
+    failedAttempts: 3,
+    lastActivity: new Date(Date.now() - 5 * 60 * 1000),
+  },
+  {
+    id: 'iq2',
+    lockId: '1',
+    lockName: 'ADMIN- INSIDE READER',
+    totalEntries: 87,
+    failedAttempts: 1,
+    lastActivity: new Date(Date.now() - 30 * 60 * 1000),
+  },
+  {
+    id: 'iq3',
+    lockId: '2',
+    lockName: 'ADMIN- OUTSIDE READER',
+    totalEntries: 95,
+    failedAttempts: 5,
+    lastActivity: new Date(Date.now() - 2 * 60 * 60 * 1000),
+  },
+];
