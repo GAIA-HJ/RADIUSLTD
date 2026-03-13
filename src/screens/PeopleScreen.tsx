@@ -8,6 +8,7 @@ import {
   StatusBar,
   TouchableOpacity,
   Modal,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {MOCK_PEOPLE, MOCK_ACCESS_GROUPS} from '../data/mockLocks';
@@ -30,12 +31,13 @@ const INVITE_STATUS_COLORS: Record<string, string> = {
 type Filter = 'all' | 'admin' | 'user' | 'guest' | 'pending';
 
 export default function PeopleScreen() {
+  const [people, setPeople] = useState<Person[]>(MOCK_PEOPLE);
   const [filter, setFilter] = useState<Filter>('all');
   const [showInvite, setShowInvite] = useState(false);
   const [showGroups, setShowGroups] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
 
-  const filtered = MOCK_PEOPLE.filter(p => {
+  const filtered = people.filter(p => {
     if (filter === 'all') {return true;}
     if (filter === 'pending') {return p.inviteStatus === 'pending';}
     return p.role === filter;
@@ -46,7 +48,31 @@ export default function PeopleScreen() {
       .map(g => g.name)
       .join(', ') || 'No groups';
 
-  const pendingCount = MOCK_PEOPLE.filter(p => p.inviteStatus === 'pending').length;
+  const pendingCount = people.filter(p => p.inviteStatus === 'pending').length;
+
+  const handleRevoke = (person: Person) => {
+    Alert.alert(
+      'Revoke Access',
+      `Remove all access for ${person.name}? They will no longer be able to open any doors.`,
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Revoke',
+          style: 'destructive',
+          onPress: () => {
+            setPeople(prev =>
+              prev.map(p =>
+                p.id === person.id
+                  ? {...p, active: false, inviteStatus: 'expired', accessLocks: [], accessGroupIds: []}
+                  : p,
+              ),
+            );
+            setSelectedPerson(null);
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -100,7 +126,9 @@ export default function PeopleScreen() {
 
             <View style={styles.info}>
               <View style={styles.nameRow}>
-                <Text style={styles.name}>{item.name}</Text>
+                <Text style={[styles.name, !item.active && styles.nameRevoked]}>
+                  {item.name}
+                </Text>
                 <View
                   style={[
                     styles.inviteDot,
@@ -110,19 +138,25 @@ export default function PeopleScreen() {
               </View>
               <Text style={styles.email}>{item.email}</Text>
               <Text style={styles.groups} numberOfLines={1}>
-                {getGroupNames(item.accessGroupIds)}
+                {item.active ? getGroupNames(item.accessGroupIds) : 'Access revoked'}
               </Text>
             </View>
 
-            <View
-              style={[
-                styles.roleBadge,
-                {backgroundColor: ROLE_COLORS[item.role] + '22'},
-              ]}>
-              <Text style={[styles.roleText, {color: ROLE_COLORS[item.role]}]}>
-                {item.role.toUpperCase()}
-              </Text>
-            </View>
+            {!item.active ? (
+              <View style={styles.revokedBadge}>
+                <Text style={styles.revokedText}>REVOKED</Text>
+              </View>
+            ) : (
+              <View
+                style={[
+                  styles.roleBadge,
+                  {backgroundColor: ROLE_COLORS[item.role] + '22'},
+                ]}>
+                <Text style={[styles.roleText, {color: ROLE_COLORS[item.role]}]}>
+                  {item.role.toUpperCase()}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         )}
         ListEmptyComponent={
@@ -230,13 +264,23 @@ export default function PeopleScreen() {
                   <Icon name="pencil-outline" size={18} color="#1565c0" />
                   <Text style={styles.actionBtnText}>Edit Access</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.actionBtn, styles.actionBtnDanger]}>
-                  <Icon name="account-off-outline" size={18} color="#f44336" />
-                  <Text style={[styles.actionBtnText, {color: '#f44336'}]}>
-                    Revoke Access
-                  </Text>
-                </TouchableOpacity>
+                {selectedPerson.active ? (
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.actionBtnDanger]}
+                    onPress={() => handleRevoke(selectedPerson)}>
+                    <Icon name="account-off-outline" size={18} color="#f44336" />
+                    <Text style={[styles.actionBtnText, {color: '#f44336'}]}>
+                      Revoke Access
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={[styles.actionBtn, styles.actionBtnRevoked]}>
+                    <Icon name="account-off-outline" size={18} color="#bbb" />
+                    <Text style={[styles.actionBtnText, {color: '#bbb'}]}>
+                      Access Revoked
+                    </Text>
+                  </View>
+                )}
               </View>
 
               <TouchableOpacity
@@ -386,7 +430,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   actionBtnDanger: {borderColor: '#f44336'},
+  actionBtnRevoked: {borderColor: '#e0e0e0'},
   actionBtnText: {fontSize: 13, fontWeight: '600', color: '#1565c0'},
+  nameRevoked: {color: '#bbb', textDecorationLine: 'line-through'},
+  revokedBadge: {paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, backgroundColor: '#fce4e4'},
+  revokedText: {fontSize: 11, fontWeight: '700', color: '#f44336'},
   closeBtn: {alignItems: 'center', paddingVertical: 10},
   closeBtnText: {fontSize: 15, color: '#aaa'},
 });
