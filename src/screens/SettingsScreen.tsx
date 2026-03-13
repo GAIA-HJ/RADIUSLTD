@@ -55,7 +55,7 @@ function SettingRow({
           thumbColor={toggleValue ? '#1565c0' : '#f4f4f4'}
         />
       )}
-      {!toggle && !value && (
+      {toggle === undefined && onPress && (
         <Icon name="chevron-right" size={20} color="#ccc" />
       )}
     </TouchableOpacity>

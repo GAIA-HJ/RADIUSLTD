@@ -8,22 +8,31 @@ import LoginScreen from './src/screens/LoginScreen';
 import ConnectionSetupScreen from './src/screens/ConnectionSetupScreen';
 import {api} from './src/services/api/ApiProvider';
 import {ApiProviderType} from './src/services/api/ApiProvider';
+import CredentialStore from './src/services/api/CredentialStore';
 
-type AppState = 'loading' | 'login' | 'setup' | 'main';
+type AppState = 'loading' | 'login' | 'main';
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>('loading');
   const [activeProvider, setActiveProvider] = useState<ApiProviderType>('mock');
+  // Show connection setup on first launch (no saved provider) or when triggered from Settings
   const [showConnectionSetup, setShowConnectionSetup] = useState(false);
+  const [firstLaunch, setFirstLaunch] = useState(false);
 
   useEffect(() => {
-    api.init().then(provider => {
+    api.init().then(async provider => {
       setActiveProvider(provider);
+      // First launch: no credentials saved → prompt setup after login
+      const saved = await CredentialStore.load();
+      setFirstLaunch(!saved);
       setAppState('login');
     });
   }, []);
 
   const handleLogin = () => {
+    if (firstLaunch) {
+      setShowConnectionSetup(true);
+    }
     setAppState('main');
   };
 
