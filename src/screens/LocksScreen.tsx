@@ -1,7 +1,7 @@
 import React, {useState, useMemo} from 'react';
 import {
   View,
-  FlatList,
+  SectionList,
   Text,
   TouchableOpacity,
   StyleSheet,
@@ -15,24 +15,39 @@ import LockListItem from '../components/LockListItem';
 import SearchBar from '../components/SearchBar';
 import DigitalKeyModal from '../components/DigitalKeyModal';
 import LockDetailScreen from './LockDetailScreen';
+import NotificationsScreen from './NotificationsScreen';
 import {Lock} from '../types';
+
+// Extract zone from lock name, e.g. "ADMIN- INSIDE READER" → "ADMIN"
+function getZone(name: string): string {
+  const match = name.match(/^([A-Z\s]+?)[-\s]/);
+  return match ? match[1].trim() : 'OTHER';
+}
 
 export default function LocksScreen() {
   const {locks, openingLockId, remoteOpen} = useLocks();
   const [search, setSearch] = useState('');
   const [digitalKeyLock, setDigitalKeyLock] = useState<Lock | null>(null);
   const [detailLock, setDetailLock] = useState<Lock | null>(null);
-
-  const filtered = useMemo(
-    () =>
-      locks.filter(l =>
-        l.name.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [locks, search],
-  );
+  const [showNotifications, setShowNotifications] = useState(false);
+  const UNREAD_ALERTS = 2; // would come from context in production
 
   const location =
     locks.length > 0 ? locks[0].location + ', All' : 'All Locations';
+
+  // Group filtered locks by zone for SectionList
+  const sections = useMemo(() => {
+    const filtered = locks.filter(l =>
+      l.name.toLowerCase().includes(search.toLowerCase()),
+    );
+    const map: Record<string, Lock[]> = {};
+    for (const lock of filtered) {
+      const zone = getZone(lock.name);
+      if (!map[zone]) {map[zone] = [];}
+      map[zone].push(lock);
+    }
+    return Object.entries(map).map(([zone, data]) => ({title: zone, data}));
+  }, [locks, search]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -40,25 +55,44 @@ export default function LocksScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerLeft}>
+        <TouchableOpacity style={styles.headerBtn}>
           <Icon name="map-marker-outline" size={22} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Locks</Text>
           <Text style={styles.headerSubtitle}>{location}</Text>
         </View>
-        <TouchableOpacity style={styles.headerRight}>
-          <Icon name="dots-vertical" size={24} color="#fff" />
+        {/* Notification bell with badge */}
+        <TouchableOpacity
+          style={styles.headerBtn}
+          onPress={() => setShowNotifications(true)}>
+          <Icon name="bell-outline" size={22} color="#fff" />
+          {UNREAD_ALERTS > 0 && (
+            <View style={styles.bellBadge}>
+              <Text style={styles.bellBadgeText}>{UNREAD_ALERTS}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.headerBtn}>
+          <Icon name="dots-vertical" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
 
       {/* Search */}
       <SearchBar value={search} onChangeText={setSearch} />
 
-      {/* List */}
-      <FlatList
-        data={filtered}
+      {/* Grouped list */}
+      <SectionList
+        sections={sections}
         keyExtractor={item => item.id}
+        renderSectionHeader={({section}) => (
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <Text style={styles.sectionCount}>
+              {section.data.length} reader{section.data.length !== 1 ? 's' : ''}
+            </Text>
+          </View>
+        )}
         renderItem={({item}) => (
           <LockListItem
             lock={item}
@@ -72,7 +106,8 @@ export default function LocksScreen() {
             <Text style={styles.emptyText}>No locks found</Text>
           </View>
         }
-        contentContainerStyle={filtered.length === 0 && styles.emptyContainer}
+        contentContainerStyle={sections.length === 0 && styles.emptyContainer}
+        stickySectionHeadersEnabled
       />
 
       {/* Digital Key FAB */}
@@ -105,55 +140,66 @@ export default function LocksScreen() {
           />
         )}
       </Modal>
+
+      {/* Notifications */}
+      <Modal
+        visible={showNotifications}
+        animationType="slide"
+        onRequestClose={() => setShowNotifications(false)}>
+        <NotificationsScreen onClose={() => setShowNotifications(false)} />
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
+  safe: {flex: 1, backgroundColor: '#f5f5f5'},
   header: {
     backgroundColor: '#1565c0',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 12,
+    gap: 4,
   },
-  headerLeft: {
-    padding: 4,
-    marginRight: 8,
-  },
-  headerCenter: {
-    flex: 1,
+  headerBtn: {padding: 4},
+  headerCenter: {flex: 1, alignItems: 'center'},
+  headerTitle: {color: '#fff', fontSize: 18, fontWeight: '700'},
+  headerSubtitle: {color: '#bbdefb', fontSize: 12, marginTop: 1},
+  bellBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#f44336',
+    borderRadius: 7,
+    minWidth: 14,
+    height: 14,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
   },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
+  bellBadgeText: {color: '#fff', fontSize: 9, fontWeight: '700'},
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f0f4fa',
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e8f0',
   },
-  headerSubtitle: {
-    color: '#bbdefb',
+  sectionTitle: {
     fontSize: 12,
-    marginTop: 1,
+    fontWeight: '700',
+    color: '#1565c0',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  headerRight: {
-    padding: 4,
-  },
-  empty: {
-    alignItems: 'center',
-    paddingTop: 60,
-  },
-  emptyText: {
-    color: '#bbb',
-    fontSize: 15,
-    marginTop: 12,
-  },
-  emptyContainer: {
-    flexGrow: 1,
-  },
+  sectionCount: {fontSize: 11, color: '#888'},
+  empty: {alignItems: 'center', paddingTop: 60},
+  emptyText: {color: '#bbb', fontSize: 15, marginTop: 12},
+  emptyContainer: {flexGrow: 1},
   digitalKeyFab: {
     position: 'absolute',
     bottom: 24,

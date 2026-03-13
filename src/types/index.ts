@@ -72,3 +72,16 @@ export interface IQMetric {
   failedAttempts: number;
   lastActivity: Date;
 }
+
+export type AlertSeverity = 'info' | 'warning' | 'critical';
+
+export interface AppAlert {
+  id: string;
+  title: string;
+  body: string;
+  severity: AlertSeverity;
+  lockId?: string;
+  lockName?: string;
+  timestamp: Date;
+  read: boolean;
+}
