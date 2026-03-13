@@ -18,14 +18,50 @@ export interface AccessEvent {
   success: boolean;
 }
 
+export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+
+export interface Schedule {
+  id: string;
+  name: string;
+  days: WeekDay[];
+  startTime: string; // "HH:MM"
+  endTime: string;   // "HH:MM"
+}
+
+export interface AccessGroup {
+  id: string;
+  name: string;
+  color: string;
+  lockIds: string[];
+  scheduleId?: string;
+}
+
 export interface Person {
   id: string;
   name: string;
   email: string;
   phone?: string;
   accessLocks: string[];
+  accessGroupIds: string[];
   role: 'admin' | 'user' | 'guest';
   active: boolean;
+  inviteStatus: 'active' | 'pending' | 'expired';
+  validFrom?: Date;
+  validUntil?: Date;
+}
+
+export interface Invitation {
+  id: string;
+  email: string;
+  phone?: string;
+  role: 'admin' | 'user' | 'guest';
+  accessGroupIds: string[];
+  lockIds: string[];
+  validFrom: Date;
+  validUntil: Date;
+  scheduleId?: string;
+  sentAt: Date;
+  status: 'pending' | 'accepted' | 'expired';
 }
 
 export interface IQMetric {

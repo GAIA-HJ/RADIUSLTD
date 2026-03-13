@@ -1,4 +1,4 @@
-import {Lock, AccessEvent, Person, IQMetric} from '../types';
+import {Lock, AccessEvent, Person, IQMetric, Schedule, AccessGroup} from '../types';
 
 export const MOCK_LOCKS: Lock[] = [
   {
@@ -106,32 +106,125 @@ export const MOCK_EVENTS: AccessEvent[] = [
   },
 ];
 
+export const MOCK_SCHEDULES: Schedule[] = [
+  {
+    id: 's1',
+    name: 'Business Hours',
+    days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    startTime: '08:00',
+    endTime: '18:00',
+  },
+  {
+    id: 's2',
+    name: 'Extended Hours',
+    days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    startTime: '07:00',
+    endTime: '22:00',
+  },
+  {
+    id: 's3',
+    name: '24/7 Access',
+    days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    startTime: '00:00',
+    endTime: '23:59',
+  },
+  {
+    id: 's4',
+    name: 'Weekend Only',
+    days: ['Sat', 'Sun'],
+    startTime: '09:00',
+    endTime: '17:00',
+  },
+];
+
+export const MOCK_ACCESS_GROUPS: AccessGroup[] = [
+  {
+    id: 'ag1',
+    name: 'Admin Team',
+    color: '#1565c0',
+    lockIds: ['1', '2', '3', '4', '5', '6', '7', '8'],
+    scheduleId: 's3',
+  },
+  {
+    id: 'ag2',
+    name: 'General Staff',
+    color: '#2e7d32',
+    lockIds: ['3', '4', '7'],
+    scheduleId: 's1',
+  },
+  {
+    id: 'ag3',
+    name: 'Creative Team',
+    color: '#6a1b9a',
+    lockIds: ['5', '6', '7'],
+    scheduleId: 's2',
+  },
+  {
+    id: 'ag4',
+    name: 'Visitors',
+    color: '#e65100',
+    lockIds: ['7'],
+    scheduleId: 's1',
+  },
+];
+
 export const MOCK_PEOPLE: Person[] = [
   {
     id: 'p1',
     name: 'John Smith',
     email: 'john.smith@radius.com',
     phone: '+1 555-0101',
-    accessLocks: ['1', '2', '7'],
+    accessLocks: ['1', '2', '3', '4', '5', '6', '7', '8'],
+    accessGroupIds: ['ag1'],
     role: 'admin',
     active: true,
+    inviteStatus: 'active',
   },
   {
     id: 'p2',
     name: 'Sarah Johnson',
     email: 'sarah.j@radius.com',
     phone: '+1 555-0102',
-    accessLocks: ['1', '7'],
+    accessLocks: ['5', '6', '7'],
+    accessGroupIds: ['ag3'],
     role: 'user',
     active: true,
+    inviteStatus: 'active',
+    validFrom: new Date('2024-01-01'),
+    validUntil: new Date('2026-12-31'),
   },
   {
     id: 'p3',
     name: 'Mike Davis',
     email: 'mike.d@radius.com',
     accessLocks: ['7'],
+    accessGroupIds: ['ag4'],
     role: 'guest',
     active: true,
+    inviteStatus: 'active',
+    validFrom: new Date(),
+    validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: 'p4',
+    name: 'Lena Torres',
+    email: 'lena.t@radius.com',
+    phone: '+1 555-0104',
+    accessLocks: ['3', '4', '7'],
+    accessGroupIds: ['ag2'],
+    role: 'user',
+    active: true,
+    inviteStatus: 'pending',
+  },
+  {
+    id: 'p5',
+    name: 'Omar Hassan',
+    email: 'omar.h@radius.com',
+    accessLocks: [],
+    accessGroupIds: [],
+    role: 'guest',
+    active: false,
+    inviteStatus: 'expired',
   },
 ];
 
