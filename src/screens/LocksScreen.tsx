@@ -8,6 +8,7 @@ import {
   StatusBar,
   SafeAreaView,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useLocks} from '../context/LocksContext';
@@ -25,7 +26,7 @@ function getZone(name: string): string {
 }
 
 export default function LocksScreen() {
-  const {locks, openingLockId, remoteOpen} = useLocks();
+  const {locks, openingLockId, remoteOpen, loading, error, refresh} = useLocks();
   const [search, setSearch] = useState('');
   const [digitalKeyLock, setDigitalKeyLock] = useState<Lock | null>(null);
   const [detailLock, setDetailLock] = useState<Lock | null>(null);
@@ -78,6 +79,13 @@ export default function LocksScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* API error banner */}
+      {error && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
       {/* Search */}
       <SearchBar value={search} onChangeText={setSearch} />
 
@@ -108,6 +116,9 @@ export default function LocksScreen() {
         }
         contentContainerStyle={sections.length === 0 && styles.emptyContainer}
         stickySectionHeadersEnabled
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={refresh} tintColor="#1565c0" />
+        }
       />
 
       {/* Digital Key FAB */}
@@ -197,6 +208,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   sectionCount: {fontSize: 11, color: '#888'},
+  errorBanner: {
+    backgroundColor: '#ffebee',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffcdd2',
+  },
+  errorText: {fontSize: 13, color: '#c62828', textAlign: 'center'},
   empty: {alignItems: 'center', paddingTop: 60},
   emptyText: {color: '#bbb', fontSize: 15, marginTop: 12},
   emptyContainer: {flexGrow: 1},
