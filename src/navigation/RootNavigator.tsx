@@ -10,6 +10,8 @@ import EventsScreen from '../screens/EventsScreen';
 import IQsScreen from '../screens/IQsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import OfflineBanner from '../components/OfflineBanner';
+import {AppContextProvider} from '../context/AppContext';
+import {ApiProviderType} from '../services/api/ApiProvider';
 
 const Tab = createBottomTabNavigator();
 
@@ -22,7 +24,12 @@ function IQsTabIcon({color, size}: {color: string; size: number}) {
   );
 }
 
-export default function RootNavigator() {
+interface Props {
+  onOpenConnectionSetup: () => void;
+  activeProvider: ApiProviderType;
+}
+
+export default function RootNavigator({onOpenConnectionSetup, activeProvider}: Props) {
   const [isOffline, setIsOffline] = useState(false);
 
   // Simulate connectivity check — replace with NetInfo in production
@@ -34,73 +41,75 @@ export default function RootNavigator() {
   }, []);
 
   return (
-    <View style={styles.flex}>
-      <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarActiveTintColor: '#1565c0',
-            tabBarInactiveTintColor: '#aaa',
-            tabBarStyle: {
-              borderTopWidth: 1,
-              borderTopColor: '#e0e0e0',
-              paddingBottom: 4,
-              height: 60,
-            },
-            tabBarLabelStyle: {
-              fontSize: 11,
-              fontWeight: '500',
-            },
-          }}>
-          <Tab.Screen
-            name="Locks"
-            component={LocksScreen}
-            options={{
-              tabBarIcon: ({color, size}) => (
-                <Icon name="lock-outline" size={size} color={color} />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="People"
-            component={PeopleScreen}
-            options={{
-              tabBarIcon: ({color, size}) => (
-                <Icon name="account-outline" size={size} color={color} />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="Events"
-            component={EventsScreen}
-            options={{
-              tabBarIcon: ({color, size}) => (
-                <Icon name="clock-outline" size={size} color={color} />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="IQs"
-            component={IQsScreen}
-            options={{
-              tabBarIcon: ({color, size}) => (
-                <IQsTabIcon color={color} size={size} />
-              ),
-            }}
-          />
-          <Tab.Screen
-            name="Settings"
-            component={SettingsScreen}
-            options={{
-              tabBarIcon: ({color, size}) => (
-                <Icon name="cog-outline" size={size} color={color} />
-              ),
-            }}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
-      <OfflineBanner visible={isOffline} />
-    </View>
+    <AppContextProvider value={{activeProvider, openConnectionSetup: onOpenConnectionSetup}}>
+      <View style={styles.flex}>
+        <NavigationContainer>
+          <Tab.Navigator
+            screenOptions={{
+              headerShown: false,
+              tabBarActiveTintColor: '#1565c0',
+              tabBarInactiveTintColor: '#aaa',
+              tabBarStyle: {
+                borderTopWidth: 1,
+                borderTopColor: '#e0e0e0',
+                paddingBottom: 4,
+                height: 60,
+              },
+              tabBarLabelStyle: {
+                fontSize: 11,
+                fontWeight: '500',
+              },
+            }}>
+            <Tab.Screen
+              name="Locks"
+              component={LocksScreen}
+              options={{
+                tabBarIcon: ({color, size}) => (
+                  <Icon name="lock-outline" size={size} color={color} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="People"
+              component={PeopleScreen}
+              options={{
+                tabBarIcon: ({color, size}) => (
+                  <Icon name="account-outline" size={size} color={color} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Events"
+              component={EventsScreen}
+              options={{
+                tabBarIcon: ({color, size}) => (
+                  <Icon name="clock-outline" size={size} color={color} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="IQs"
+              component={IQsScreen}
+              options={{
+                tabBarIcon: ({color, size}) => (
+                  <IQsTabIcon color={color} size={size} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="Settings"
+              component={SettingsScreen}
+              options={{
+                tabBarIcon: ({color, size}) => (
+                  <Icon name="cog-outline" size={size} color={color} />
+                ),
+              }}
+            />
+          </Tab.Navigator>
+        </NavigationContainer>
+        <OfflineBanner visible={isOffline} />
+      </View>
+    </AppContextProvider>
   );
 }
 

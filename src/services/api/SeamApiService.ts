@@ -20,7 +20,7 @@
 import {Lock, AccessEvent} from '../../types';
 
 // ---------------------------------------------------------------------------
-// Configuration — replace with your real Seam API key
+// Configuration — set at runtime via SeamApiService.configure()
 // ---------------------------------------------------------------------------
 const SEAM_CONFIG = {
   apiKey: 'YOUR_SEAM_API_KEY',   // seam_test2ZTo_... or seam_prod...
@@ -53,6 +53,11 @@ interface SeamLockEvent {
 }
 
 class SeamApiService {
+  /** Apply credentials loaded from CredentialStore at runtime. */
+  configure(apiKey: string): void {
+    SEAM_CONFIG.apiKey = apiKey;
+  }
+
   private async request<T>(
     method: 'GET' | 'POST',
     path: string,

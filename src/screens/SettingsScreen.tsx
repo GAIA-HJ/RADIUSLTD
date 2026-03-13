@@ -12,6 +12,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import SchedulesScreen from './SchedulesScreen';
+import {useAppContext} from '../context/AppContext';
+
+const PROVIDER_LABELS: Record<string, string> = {
+  mock: 'Offline / Mock',
+  seam: 'Seam API',
+  salto: 'SALTO Direct',
+};
 
 interface SettingRowProps {
   icon: string;
@@ -56,6 +63,7 @@ function SettingRow({
 }
 
 export default function SettingsScreen() {
+  const {activeProvider, openConnectionSetup} = useAppContext();
   const [bleEnabled, setBleEnabled] = useState(true);
   const [nfcEnabled, setNfcEnabled] = useState(true);
   const [notifications, setNotifications] = useState(true);
@@ -124,6 +132,16 @@ export default function SettingsScreen() {
             icon="map-marker-outline"
             label="Current Site"
             value="AL. MASHTAL"
+          />
+        </View>
+
+        <Text style={styles.sectionTitle}>Connection</Text>
+        <View style={styles.section}>
+          <SettingRow
+            icon="api"
+            label="Connect to SALTO KS"
+            value={PROVIDER_LABELS[activeProvider] ?? activeProvider}
+            onPress={openConnectionSetup}
           />
         </View>
 

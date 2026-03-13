@@ -60,6 +60,17 @@ class SaltoApiService {
   private accessToken: string | null = null;
   private tokenExpiry: number = 0;
 
+  /** Apply credentials loaded from CredentialStore at runtime. */
+  configure(opts: {clientId: string; clientSecret: string; siteId: string; baseUrl?: string}): void {
+    SALTO_CONFIG.clientId = opts.clientId;
+    SALTO_CONFIG.clientSecret = opts.clientSecret;
+    SALTO_CONFIG.siteId = opts.siteId;
+    if (opts.baseUrl) {SALTO_CONFIG.baseUrl = opts.baseUrl;}
+    // Reset token so next request re-authenticates with new credentials
+    this.accessToken = null;
+    this.tokenExpiry = 0;
+  }
+
   // -------------------------------------------------------------------------
   // Authentication (OAuth 2.0 Client Credentials)
   // -------------------------------------------------------------------------
